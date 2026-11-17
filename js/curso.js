@@ -1,7 +1,7 @@
 /*
   Contenido del curso, en el orden del esquema.
   Cada sección tiene pasos a pantalla completa. Tipos de paso:
-    portada · video · lectura · faq · documento · enlace · mapa · parejas · vf · clasificar · opcion · completar · fin
+    portada · video · lectura · faq · documento · enlace · mapa · parejas · vf · clasificar · opcion · completar · palabra · ordenar · fin
   Para publicar las evaluaciones, el foro o la encuesta, pega el enlace en "url" del paso de tipo "enlace".
 */
 window.CURSO = {
@@ -82,6 +82,18 @@ window.CURSO = {
             },
           ],
         },
+        {
+          tipo: "ordenar",
+          id: "s1-ordenar",
+          pregunta: "¿Qué sigue después de terminar el curso?",
+          instruccion: "Toca los pasos en el orden en que pasan.",
+          items: [
+            "Termino todas las actividades del curso",
+            "Me llega la convocatoria al correo personal y por mensaje de texto",
+            "Me conecto a la juramentación virtual en ZOOM, con la cámara encendida",
+            "Recibo el certificado y el carnet digitales por correo",
+          ],
+        },
       ],
     },
     {
@@ -89,6 +101,12 @@ window.CURSO = {
       numero: "2",
       titulo: "Video institucional",
       pasos: [
+        {
+          tipo: "portada",
+          id: "s2-portada",
+          sub: "En esta sección",
+          texto: "Conoce la historia, la estructura y los servicios del Colegio de Ciencias Económicas de Costa Rica.",
+        },
         {
           tipo: "video",
           id: "institucional",
@@ -98,6 +116,16 @@ window.CURSO = {
           subtitulos: "media/subtitulos/institucional.vtt",
           leer: { titulo: "Video institucional", texto: "Presentación del Colegio de Ciencias Económicas de Costa Rica." },
         },
+        {
+          tipo: "palabra",
+          id: "s2-palabra",
+          pregunta: "Completa la palabra",
+          instruccion: "Toca las letras en orden para completar cada frase.",
+          frases: [
+            { antes: "Desde 2019, el Colegio cuenta con el", palabra: "CIDE", despues: ", su Centro de Innovación y Desarrollo Empresarial." },
+            { antes: "En la plataforma digital Mi", palabra: "COLEGIO", mostrar: "Colegio", despues: "puede pagar la colegiatura y emitir su carnet." },
+          ],
+        },
       ],
     },
     {
@@ -105,6 +133,12 @@ window.CURSO = {
       numero: "3",
       titulo: "Revista",
       pasos: [
+        {
+          tipo: "portada",
+          id: "s3-portada",
+          sub: "En esta sección",
+          texto: "La revista de bienvenida del Colegio para las personas que se incorporan.",
+        },
         {
           tipo: "documento",
           id: "revista",
@@ -121,6 +155,12 @@ window.CURSO = {
       titulo: "Fiscalía",
       pasos: [
         {
+          tipo: "portada",
+          id: "s4-portada",
+          sub: "En esta sección",
+          texto: "La Fiscalía del Colegio explica qué es un colegio profesional, el ejercicio ilegal de la profesión y cómo presentar una denuncia.",
+        },
+        {
           tipo: "video",
           id: "fiscalia",
           titulo: "La Fiscalía del Colegio",
@@ -132,6 +172,16 @@ window.CURSO = {
             texto: "Qué es un colegio profesional, la Ley 9529 y la Fiscalía, el ejercicio ilegal de la profesión, las causas de suspensión, cómo presentar una denuncia y preguntas frecuentes sobre la incorporación.",
           },
         },
+        {
+          tipo: "palabra",
+          id: "s4-palabra",
+          pregunta: "Completa la palabra",
+          instruccion: "Toca las letras en orden para completar cada frase.",
+          frases: [
+            { antes: "No basta con tener un título universitario: para ejercer hay que estar", palabra: "AGREMIADO", mostrar: "agremiado", despues: "al colegio profesional." },
+            { antes: "La Fiscalía no es un órgano", palabra: "SANCIONADOR", mostrar: "sancionador", despues: ": la sanción la impone la Junta Directiva." },
+          ],
+        },
       ],
     },
     {
@@ -139,6 +189,12 @@ window.CURSO = {
       numero: "5",
       titulo: "Bienvenida: Módulos de Ética Profesional",
       pasos: [
+        {
+          tipo: "portada",
+          id: "s5-portada",
+          sub: "En esta sección",
+          texto: "Te damos la bienvenida a los tres módulos de ética: social, ambiental y profesional.",
+        },
         {
           tipo: "video",
           id: "intro",
@@ -477,6 +533,12 @@ window.CURSO = {
       numero: "6",
       titulo: "Encuesta de satisfacción",
       pasos: [
+        {
+          tipo: "portada",
+          id: "s6-portada",
+          sub: "En esta sección",
+          texto: "Cuéntanos qué te pareció el curso.",
+        },
         {
           tipo: "enlace",
           id: "encuesta",

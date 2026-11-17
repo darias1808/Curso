@@ -86,6 +86,7 @@
       portada: construirPortada, video: construirVideo, lectura: construirLectura, faq: construirFaq,
       documento: construirDocumento, enlace: construirEnlace, parejas: construirParejas, vf: construirVF,
       clasificar: construirClasificar, opcion: construirOpcion, completar: construirCompletar, fin: construirFin,
+      palabra: construirPalabra, ordenar: construirOrdenar,
       mapa: construirMapa,
     }[p.tipo];
     f(s, p);
@@ -100,8 +101,10 @@
 
   function etiquetaPaso(p) {
     var t = p.titulo || p.pregunta || p.sec.titulo;
-    var tipo = { portada: "Sección", video: "Video", lectura: "Lectura", faq: "Preguntas frecuentes", documento: "Documento", enlace: p.etiqueta || "Enlace", fin: "Final", mapa: "Mapa interactivo" }[p.tipo] || "Pregunta";
-    return tipo + ", " + t;
+    return tipoPaso(p) + ", " + t;
+  }
+  function tipoPaso(p) {
+    return { portada: "Introducción", video: "Video", lectura: "Lectura", faq: "Preguntas frecuentes", documento: "Documento", enlace: p.etiqueta || "Enlace", fin: "Final", mapa: "Mapa interactivo" }[p.tipo] || "Actividad";
   }
 
   function construirPortada(s, p) {
@@ -111,7 +114,7 @@
     var h = el("h2", "tira portada-tit", p.sec.titulo);
     d.appendChild(h);
     if (p.texto) {
-      d.appendChild(el("p", "portada-sub", /^5\./.test(p.sec.numero) ? "Objetivo" : "Antes de empezar"));
+      d.appendChild(el("p", "portada-sub", p.sub || (/^5\./.test(p.sec.numero) ? "Objetivo" : "Antes de empezar")));
       d.appendChild(el("p", "portada-texto", p.texto));
     }
     s.appendChild(d);
@@ -647,6 +650,143 @@
     };
   }
 
+  // Completa la palabra: se tocan las letras en orden (con algunas letras de más para despistar)
+  function construirPalabra(s, p) {
+    var t = tarjetaBase(s, "Actividad", true);
+    t.appendChild(el("h2", "", p.pregunta));
+    t.appendChild(el("p", "instruccion", p.instruccion));
+    var caja = el("div", "palabra");
+    var cuenta = el("span", "clasif-cuenta");
+    var frase = el("p", "palabra-frase");
+    var huecos = el("div", "palabra-huecos");
+    huecos.setAttribute("role", "status");
+    var letras = el("div", "palabra-letras");
+    letras.setAttribute("role", "group");
+    letras.setAttribute("aria-label", "Letras disponibles");
+    var hechas = el("ul", "palabra-hechas");
+    caja.appendChild(cuenta);
+    caja.appendChild(frase);
+    caja.appendChild(huecos);
+    caja.appendChild(letras);
+    caja.appendChild(hechas);
+    t.appendChild(caja);
+    botonVerVideo(t, p);
+    var i = 0, pos = 0, fallos = 0;
+    var EXTRA = "AEIOURSTLN";
+    function textoFrase(f, palabra) {
+      var d = f.despues || "";
+      return f.antes + " " + palabra + (/^[,.:;]/.test(d) ? "" : " ") + d;
+    }
+    function barajar(a) {
+      for (var k = a.length - 1; k > 0; k--) { var j = Math.floor(Math.random() * (k + 1)); var x = a[k]; a[k] = a[j]; a[j] = x; }
+      return a;
+    }
+    function pintar() {
+      huecos.textContent = "";
+      letras.textContent = "";
+      var listo = i >= p.frases.length;
+      cuenta.hidden = frase.hidden = huecos.hidden = letras.hidden = listo;
+      if (listo) return;
+      var f = p.frases[i];
+      cuenta.textContent = "Frase " + (i + 1) + " de " + p.frases.length;
+      frase.textContent = textoFrase(f, "_".repeat(f.palabra.length));
+      f.palabra.split("").forEach(function () {
+        var h = el("span", "hueco-letra");
+        h.setAttribute("aria-hidden", "true");
+        huecos.appendChild(h);
+      });
+      huecos.setAttribute("aria-label", "Palabra de " + f.palabra.length + " letras. Llevas: ninguna letra");
+      var extra = EXTRA.split("").filter(function (c) { return f.palabra.indexOf(c) < 0; });
+      var fichas = f.palabra.split("").concat(barajar(extra).slice(0, Math.min(3, extra.length)));
+      barajar(fichas).forEach(function (c) {
+        var b = el("button", "letra-ficha", c);
+        b.type = "button";
+        b.setAttribute("aria-label", "Letra " + c);
+        b.addEventListener("click", function () { tocar(b, c); });
+        letras.appendChild(b);
+      });
+    }
+    function tocar(b, c) {
+      var f = p.frases[i];
+      if (!f || b.disabled) return;
+      if (c === f.palabra[pos]) {
+        pos++;
+        b.disabled = true;
+        b.classList.add("usada");
+        var h = huecos.children[pos - 1];
+        h.textContent = c;
+        h.classList.add("lleno");
+        huecos.setAttribute("aria-label", "Llevas: " + f.palabra.slice(0, pos));
+        if (pos === f.palabra.length) {
+          hechas.appendChild(el("li", "", "✓ " + textoFrase(f, f.mostrar || f.palabra)));
+          anunciar("Correcto: " + f.palabra + ".");
+          i++;
+          pos = 0;
+          if (i === p.frases.length) { st.r[p.id] = { fallos: fallos }; respondida(p); }
+          setTimeout(pintar, 350);
+        }
+      } else {
+        fallos++;
+        anunciar("Esa letra no va ahí. Prueba otra.");
+        b.classList.add("fallo");
+        setTimeout(function () { b.classList.remove("fallo"); }, 450);
+      }
+    }
+    pintar();
+    p._restaurar = function () {
+      if (st.r[p.id] === undefined) return;
+      p.frases.forEach(function (f) { hechas.appendChild(el("li", "", "✓ " + textoFrase(f, f.mostrar || f.palabra))); });
+      i = p.frases.length;
+      pintar();
+    };
+  }
+
+  // Ordena los pasos: se tocan en el orden correcto y van bajando a la lista numerada
+  function construirOrdenar(s, p) {
+    var t = tarjetaBase(s, "Actividad", true);
+    t.appendChild(el("h2", "", p.pregunta));
+    t.appendChild(el("p", "instruccion", p.instruccion));
+    var lista = el("ol", "ordenar-lista");
+    var opciones = el("div", "ordenar-opciones");
+    opciones.setAttribute("role", "group");
+    opciones.setAttribute("aria-label", "Pasos por ordenar");
+    t.appendChild(lista);
+    t.appendChild(opciones);
+    botonVerVideo(t, p);
+    var sig = 0, fallos = 0;
+    var orden = p.items.map(function (x, k) { return k; });
+    for (var k = orden.length - 1; k > 0; k--) { var j = Math.floor(Math.random() * (k + 1)); var x = orden[k]; orden[k] = orden[j]; orden[j] = x; }
+    if (orden.every(function (v, k) { return v === k; })) orden.reverse();
+    var botones = orden.map(function (k) {
+      var b = el("button", "ordenar-btn", p.items[k]);
+      b.type = "button";
+      b.addEventListener("click", function () { elegir(k, b); });
+      opciones.appendChild(b);
+      return b;
+    });
+    function colocar(k) { lista.appendChild(el("li", "", p.items[k])); }
+    function elegir(k, b) {
+      if (k === sig) {
+        colocar(k);
+        b.remove();
+        sig++;
+        anunciar("Correcto, paso " + sig + ".");
+        if (sig === p.items.length) { opciones.hidden = true; st.r[p.id] = { fallos: fallos }; respondida(p); }
+      } else {
+        fallos++;
+        anunciar("Ese no es el paso " + (sig + 1) + ". Prueba otro.");
+        b.classList.add("fallo");
+        setTimeout(function () { b.classList.remove("fallo"); }, 450);
+      }
+    }
+    p._restaurar = function () {
+      if (st.r[p.id] === undefined) return;
+      botones.forEach(function (b) { b.remove(); });
+      p.items.forEach(function (x, k) { colocar(k); });
+      opciones.hidden = true;
+    };
+  }
+
   // ---------- Cabecera, controles y avisos ----------
   var ICO_SONIDO = "M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.47 4.47 0 0 0 2.5-4zM14 3.23v2.06a7 7 0 0 1 0 13.42v2.06A9 9 0 0 0 14 3.23z";
   var ICO_MUDO = "M16.5 12A4.5 4.5 0 0 0 14 8v2.18l2.45 2.45c.03-.2.05-.41.05-.63zM19 12c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.8 8.8 0 0 0 21 12a9 9 0 0 0-7-8.77v2.06A7 7 0 0 1 19 12zM4.27 3 3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06a9 9 0 0 0 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4 9.91 6.09 12 8.18V4z";
@@ -692,6 +832,7 @@
   function pintarCabecera() {
     var p = P[st.i];
     $("titulo-seccion").textContent = nombreSeccion(p.sec);
+    $("paso-actual").textContent = "Paso " + (p.k + 1) + " de " + p.sec.pasos.length + " · " + tipoPaso(p);
     var hechos = 0;
     C.secciones.forEach(function (s, si) {
       var n = 0;

@@ -8,10 +8,10 @@ El curso se recorre como un feed de videos cortos: se desliza hacia arriba para 
 
 El orden sigue el esquema del curso:
 
-1. Información importante (preguntas frecuentes)
-2. Video institucional
+1. Información importante: preguntas frecuentes y la actividad «Ordena los pasos»
+2. Video institucional y la actividad «Completa la palabra»
 3. Revista Punto 3
-4. Fiscalía
+4. Fiscalía: video y la actividad «Completa la palabra»
 5. Bienvenida a los módulos de ética
    - 5.1 Ética Social: 2 videos, 2 lecturas, 2 preguntas, video de tolerancia y evaluación
    - 5.2 Ética Ambiental: 3 videos, 3 lecturas, 3 preguntas, evaluación y foro «Mi punto de vista»
@@ -20,6 +20,8 @@ El orden sigue el esquema del curso:
 
 ## Cómo funciona
 
+- **Orientación:** cada sección empieza con una tarjeta de introducción, y arriba siempre se ve la sección y el paso, por ejemplo «Paso 3 de 9 · Video».
+- **Actividades:** parejas, verdadero o falso, clasificar, caso con opción única, completar la frase, completar la palabra (tocando letras) y ordenar los pasos.
 - **Avance:** los videos se pueden adelantar o saltar sin terminarlos. Las preguntas y el mapa sí hay que completarlos para seguir. La barra de avance marca un video como visto cuando se ve completo.
 - **Videos:** en celular se usa la versión vertical y en PC la horizontal.
 - **Botones de cada video:**
