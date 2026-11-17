@@ -2,7 +2,7 @@
   Curso de Ética Profesional · reproductor tipo feed (como TikTok), sin cuentas ni "me gusta".
   - Todo el curso es una secuencia de pasos a pantalla completa, en el orden del esquema (js/curso.js).
   - Se avanza deslizando, con la rueda, con las flechas del teclado o con los botones.
-    Solo se pasa al siguiente cuando el actual está completo (video visto entero, pregunta respondida).
+    Los videos se pueden saltar; las preguntas y el mapa hay que completarlos para seguir.
   - Videos: vertical en celular y horizontal en PC; sonido, subtítulos, "Leer" y "Transcripción".
   - El avance se guarda en este navegador (localStorage).
 */
@@ -61,9 +61,11 @@
     if (["portada", "lectura", "faq", "documento", "fin"].indexOf(p.tipo) >= 0) return true;
     return st.r[p.id] !== undefined;
   }
-  // Primer paso que todavía no está completo: hasta ahí se puede llegar
+  // ¿Este paso impide seguir? Los videos no: se puede avanzar aunque no se hayan terminado.
+  function bloquea(k) { return P[k].tipo !== "video" && !completo(k); }
+  // Primer paso que impide seguir: hasta ahí se puede llegar
   function alcanzable() {
-    for (var k = 0; k < P.length; k++) if (!completo(k)) return k;
+    for (var k = 0; k < P.length; k++) if (bloquea(k)) return k;
     return P.length - 1;
   }
   function orientacion() {
@@ -149,7 +151,6 @@
     var o = { v: v, play: play, visto: visto, avance: avance, p: p, orient: null, k: P.indexOf(p) };
     videos[p.id] = o;
 
-    function tope() { return st.vid[p.id] ? Infinity : st.vis[p.id] || 0; }
     function alternar() {
       if (v.paused) reproducir(o); else v.pause();
     }
@@ -166,22 +167,19 @@
       pintarVideo(o);
       guardarCadaRato();
     });
-    v.addEventListener("seeking", function () {
-      if (v.currentTime > tope() + 0.5) v.currentTime = tope();
-    });
     v.addEventListener("ended", function () {
       st.vid[p.id] = true;
       st.vis[p.id] = v.duration;
       guardar();
       pintarVideo(o);
       pintarNav();
-      anunciar("Video terminado. Ya puedes continuar.");
+      anunciar("Video terminado.");
     });
     v.addEventListener("loadedmetadata", function () { aplicarSubtitulos(o); });
     lt.addEventListener("click", function (e) {
       var r = lt.getBoundingClientRect();
       var t = ((e.clientX - r.left) / r.width) * (v.duration || 0);
-      v.currentTime = Math.max(0, Math.min(t, tope()));
+      v.currentTime = Math.max(0, t);
     });
   }
   function fuentes(p) {
@@ -337,7 +335,7 @@
       ir(k, true);
       var o = videos[p.verEnVideo.paso];
       var irA = function () {
-        o.v.currentTime = Math.min(p.verEnVideo.t, st.vid[o.p.id] ? Infinity : st.vis[o.p.id] || 0);
+        o.v.currentTime = p.verEnVideo.t;
         reproducir(o);
       };
       if (o.v.readyState >= 1) irA();
@@ -710,7 +708,7 @@
     $("btn-arriba").disabled = st.i === 0;
     var ultimoPaso = st.i === P.length - 1;
     abajo.disabled = ultimoPaso;
-    var ok = completo(st.i);
+    var ok = !bloquea(st.i);
     abajo.classList.toggle("listo", !ultimoPaso && ok);
     abajo.setAttribute("aria-label", ok ? "Paso siguiente" : "Completa este paso para continuar");
     $("ico-abajo").setAttribute("d", ok ? "M12 17l7-7-1.4-1.4L12 14.2 6.4 8.6 5 10z" : "M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2zm-7-2a2 2 0 0 1 4 0v2h-4z");
@@ -724,12 +722,12 @@
     if (j < 0 || j >= P.length || j === st.i) return;
     if (j > st.i && !forzar) {
       for (var k = st.i; k < j; k++) {
-        if (!completo(k)) {
+        if (bloquea(k)) {
           app.style.setProperty("--tr", "translateY(" + -st.i * 100 + "%)");
           app.classList.remove("rebote");
           void app.offsetWidth;
           app.classList.add("rebote");
-          anunciar(P[st.i].tipo === "video" ? "Mira el video completo para continuar." : "Completa este paso para continuar.");
+          anunciar("Completa este paso para continuar.");
           return;
         }
       }

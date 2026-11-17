@@ -20,7 +20,7 @@ El orden sigue el esquema del curso:
 
 ## Cómo funciona
 
-- **Avance:** solo se pasa al siguiente paso cuando el actual está completo. Un video se completa al verlo entero y una pregunta al responderla.
+- **Avance:** los videos se pueden adelantar o saltar sin terminarlos. Las preguntas y el mapa sí hay que completarlos para seguir. La barra de avance marca un video como visto cuando se ve completo.
 - **Videos:** en celular se usa la versión vertical y en PC la horizontal.
 - **Botones de cada video:**
   - **Leer** muestra la lectura relacionada.
