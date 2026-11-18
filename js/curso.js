@@ -1,7 +1,7 @@
 /*
   Contenido del curso, en el orden del esquema.
   Cada sección tiene pasos a pantalla completa. Tipos de paso:
-    portada · video · lectura · faq · documento · enlace · mapa · parejas · vf · clasificar · opcion · completar · palabra · ordenar · fin
+    portada · video · lectura · faq · documento · enlace · mapa · parejas · vf · clasificar · opcion · completar · oracion · ordenar · fin
   Para publicar las evaluaciones, el foro o la encuesta, pega el enlace en "url" del paso de tipo "enlace".
 */
 window.CURSO = {
@@ -117,14 +117,11 @@ window.CURSO = {
           leer: { titulo: "Video institucional", texto: "Presentación del Colegio de Ciencias Económicas de Costa Rica." },
         },
         {
-          tipo: "palabra",
-          id: "s2-palabra",
-          pregunta: "Completa la palabra",
-          instruccion: "Toca las letras en orden para completar cada frase.",
-          frases: [
-            { antes: "Desde 2019, el Colegio cuenta con el", palabra: "CIDE", despues: ", su Centro de Innovación y Desarrollo Empresarial." },
-            { antes: "En la plataforma digital Mi", palabra: "COLEGIO", mostrar: "Colegio", despues: "puede pagar la colegiatura y emitir su carnet." },
-          ],
+          tipo: "oracion",
+          id: "s2-oracion",
+          contexto: "Desde 2019, el Colegio tiene su Centro de Innovación y Desarrollo Empresarial.",
+          pregunta: "Arma la frase",
+          respuesta: "El CIDE impulsa las iniciativas productivas de los colegiados",
         },
       ],
     },
@@ -173,14 +170,11 @@ window.CURSO = {
           },
         },
         {
-          tipo: "palabra",
-          id: "s4-palabra",
-          pregunta: "Completa la palabra",
-          instruccion: "Toca las letras en orden para completar cada frase.",
-          frases: [
-            { antes: "No basta con tener un título universitario: para ejercer hay que estar", palabra: "AGREMIADO", mostrar: "agremiado", despues: "al colegio profesional." },
-            { antes: "La Fiscalía no es un órgano", palabra: "SANCIONADOR", mostrar: "sancionador", despues: ": la sanción la impone la Junta Directiva." },
-          ],
+          tipo: "oracion",
+          id: "s4-oracion",
+          contexto: "Un título universitario no alcanza para ejercer la profesión.",
+          pregunta: "Arma la regla",
+          respuesta: "Para ejercer hay que estar agremiado al colegio profesional",
         },
       ],
     },

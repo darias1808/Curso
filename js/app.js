@@ -86,7 +86,7 @@
       portada: construirPortada, video: construirVideo, lectura: construirLectura, faq: construirFaq,
       documento: construirDocumento, enlace: construirEnlace, parejas: construirParejas, vf: construirVF,
       clasificar: construirClasificar, opcion: construirOpcion, completar: construirCompletar, fin: construirFin,
-      palabra: construirPalabra, ordenar: construirOrdenar,
+      oracion: construirOracion, ordenar: construirOrdenar,
       mapa: construirMapa,
     }[p.tipo];
     f(s, p);
@@ -650,94 +650,74 @@
     };
   }
 
-  // Completa la palabra: se tocan las letras en orden (con algunas letras de más para despistar)
-  function construirPalabra(s, p) {
+  // Arma la oración: las palabras salen desordenadas y se tocan en orden para armar la frase.
+  // Tocar una palabra ya puesta la devuelve. Al usar todas, se revisa.
+  function construirOracion(s, p) {
     var t = tarjetaBase(s, "Actividad", true);
+    if (p.contexto) t.appendChild(el("p", "contexto", p.contexto));
     t.appendChild(el("h2", "", p.pregunta));
-    t.appendChild(el("p", "instruccion", p.instruccion));
-    var caja = el("div", "palabra");
-    var cuenta = el("span", "clasif-cuenta");
-    var frase = el("p", "palabra-frase");
-    var huecos = el("div", "palabra-huecos");
-    huecos.setAttribute("role", "status");
-    var letras = el("div", "palabra-letras");
-    letras.setAttribute("role", "group");
-    letras.setAttribute("aria-label", "Letras disponibles");
-    var hechas = el("ul", "palabra-hechas");
-    caja.appendChild(cuenta);
-    caja.appendChild(frase);
-    caja.appendChild(huecos);
-    caja.appendChild(letras);
-    caja.appendChild(hechas);
-    t.appendChild(caja);
+    t.appendChild(el("p", "instruccion", "Toca las palabras en orden para armar la frase."));
+    var armada = el("div", "oracion-armada");
+    armada.setAttribute("aria-label", "Frase armada");
+    armada.setAttribute("role", "group");
+    var vacia = el("span", "oracion-vacia", "Toca las palabras de abajo…");
+    armada.appendChild(vacia);
+    var banco = el("div", "oracion-banco");
+    banco.setAttribute("role", "group");
+    banco.setAttribute("aria-label", "Palabras disponibles");
+    var resultado = el("p", "oracion-resultado");
+    resultado.setAttribute("aria-live", "polite");
+    t.appendChild(armada);
+    t.appendChild(banco);
+    t.appendChild(resultado);
     botonVerVideo(t, p);
-    var i = 0, pos = 0, fallos = 0;
-    var EXTRA = "AEIOURSTLN";
-    function textoFrase(f, palabra) {
-      var d = f.despues || "";
-      return f.antes + " " + palabra + (/^[,.:;]/.test(d) ? "" : " ") + d;
+    var palabras = p.respuesta.split(" ");
+    var fallos = 0, listo = false;
+    var orden = palabras.map(function (x, k) { return k; });
+    for (var k = orden.length - 1; k > 0; k--) { var j = Math.floor(Math.random() * (k + 1)); var x = orden[k]; orden[k] = orden[j]; orden[j] = x; }
+    if (orden.every(function (v, k) { return v === k; })) orden.reverse();
+    var fichas = orden.map(function (k) {
+      var b = el("button", "oracion-ficha", palabras[k]);
+      b.type = "button";
+      b.addEventListener("click", function () { mover(b); });
+      banco.appendChild(b);
+      return b;
+    });
+    function texto() {
+      return Array.prototype.map.call(armada.querySelectorAll(".oracion-ficha"), function (b) { return b.textContent; }).join(" ");
     }
-    function barajar(a) {
-      for (var k = a.length - 1; k > 0; k--) { var j = Math.floor(Math.random() * (k + 1)); var x = a[k]; a[k] = a[j]; a[j] = x; }
-      return a;
-    }
-    function pintar() {
-      huecos.textContent = "";
-      letras.textContent = "";
-      var listo = i >= p.frases.length;
-      cuenta.hidden = frase.hidden = huecos.hidden = letras.hidden = listo;
+    function mover(b) {
       if (listo) return;
-      var f = p.frases[i];
-      cuenta.textContent = "Frase " + (i + 1) + " de " + p.frases.length;
-      frase.textContent = textoFrase(f, "_".repeat(f.palabra.length));
-      f.palabra.split("").forEach(function () {
-        var h = el("span", "hueco-letra");
-        h.setAttribute("aria-hidden", "true");
-        huecos.appendChild(h);
-      });
-      huecos.setAttribute("aria-label", "Palabra de " + f.palabra.length + " letras. Llevas: ninguna letra");
-      var extra = EXTRA.split("").filter(function (c) { return f.palabra.indexOf(c) < 0; });
-      var fichas = f.palabra.split("").concat(barajar(extra).slice(0, Math.min(3, extra.length)));
-      barajar(fichas).forEach(function (c) {
-        var b = el("button", "letra-ficha", c);
-        b.type = "button";
-        b.setAttribute("aria-label", "Letra " + c);
-        b.addEventListener("click", function () { tocar(b, c); });
-        letras.appendChild(b);
-      });
+      armada.classList.remove("mal");
+      resultado.textContent = "";
+      if (b.parentNode === banco) armada.appendChild(b); else banco.appendChild(b);
+      vacia.hidden = armada.querySelectorAll(".oracion-ficha").length > 0;
+      if (banco.querySelectorAll(".oracion-ficha").length === 0) revisar();
     }
-    function tocar(b, c) {
-      var f = p.frases[i];
-      if (!f || b.disabled) return;
-      if (c === f.palabra[pos]) {
-        pos++;
-        b.disabled = true;
-        b.classList.add("usada");
-        var h = huecos.children[pos - 1];
-        h.textContent = c;
-        h.classList.add("lleno");
-        huecos.setAttribute("aria-label", "Llevas: " + f.palabra.slice(0, pos));
-        if (pos === f.palabra.length) {
-          hechas.appendChild(el("li", "", "✓ " + textoFrase(f, f.mostrar || f.palabra)));
-          anunciar("Correcto: " + f.palabra + ".");
-          i++;
-          pos = 0;
-          if (i === p.frases.length) { st.r[p.id] = { fallos: fallos }; respondida(p); }
-          setTimeout(pintar, 350);
-        }
+    function revisar() {
+      if (texto() === p.respuesta) {
+        listo = true;
+        armada.classList.add("bien");
+        fichas.forEach(function (b) { b.disabled = true; });
+        banco.hidden = true;
+        resultado.textContent = "✓ ¡Correcto!";
+        st.r[p.id] = { fallos: fallos };
+        respondida(p);
       } else {
         fallos++;
-        anunciar("Esa letra no va ahí. Prueba otra.");
-        b.classList.add("fallo");
-        setTimeout(function () { b.classList.remove("fallo"); }, 450);
+        armada.classList.add("mal");
+        resultado.textContent = "✗ Ese no es el orden. Toca una palabra para devolverla y prueba otra vez.";
+        anunciar("Ese no es el orden. Prueba otra vez.");
       }
     }
-    pintar();
     p._restaurar = function () {
       if (st.r[p.id] === undefined) return;
-      p.frases.forEach(function (f) { hechas.appendChild(el("li", "", "✓ " + textoFrase(f, f.mostrar || f.palabra))); });
-      i = p.frases.length;
-      pintar();
+      palabras.forEach(function (w, k) {
+        var b = fichas.filter(function (f) { return f.textContent === w && f.parentNode === banco; })[0];
+        if (b) armada.appendChild(b);
+      });
+      vacia.hidden = true;
+      revisar();
     };
   }
 

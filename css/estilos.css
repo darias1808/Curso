@@ -715,49 +715,51 @@ button { font-family: inherit; }
 .comp-ops button.elegido { background: var(--azul); color: #fff; opacity: 1; }
 .comp-ops button.es-correcta { border-color: var(--verde); background: var(--verde); color: #fff; opacity: 1; }
 
-/* Completa la palabra */
-.palabra { display: grid; gap: 12px; }
-.palabra [hidden] { display: none; }
-.tarjeta .palabra-frase { margin: 0; font-size: clamp(1rem, 4.2vw, 1.15rem); font-weight: 600; line-height: 1.5; }
-.palabra-huecos { display: flex; flex-wrap: wrap; gap: 4px; }
-.hueco-letra {
-  width: clamp(22px, 6.6vw, 32px);
-  height: clamp(32px, 9vw, 40px);
-  display: grid;
-  place-items: center;
-  font-family: var(--titulo);
-  font-size: 1.15rem;
+/* Arma la oración */
+.tarjeta .contexto {
+  background: var(--azul-claro);
+  border-left: 5px solid var(--azul);
+  padding: 8px 12px;
+  font-size: clamp(0.92rem, 3.8vw, 1rem);
+  color: var(--azul);
+  font-weight: 600;
+}
+.oracion-armada {
+  min-height: 64px;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 8px;
+  padding: 10px;
+  margin-bottom: 12px;
   background: #fff;
   border: 2px dashed #9a9ca8;
-  border-radius: 6px;
-  color: var(--azul);
+  border-radius: 10px;
 }
-.hueco-letra.lleno { border-style: solid; border-color: var(--verde); background: var(--verde-claro); }
-.palabra-letras { display: flex; flex-wrap: wrap; gap: 8px; }
-.letra-ficha {
-  width: 46px;
-  height: 46px;
-  font-family: var(--titulo);
-  font-size: 1.2rem;
-  border-radius: 8px;
+.oracion-armada.bien { border-style: solid; border-color: var(--verde); background: var(--verde-claro); }
+.oracion-armada.mal { border-style: solid; border-color: var(--rojo); background: var(--rojo-claro); animation: sacudir 0.35s; }
+.oracion-vacia { color: #7a7c88; font-size: 0.95rem; align-self: center; }
+.oracion-vacia[hidden] { display: none; }
+.oracion-banco { display: flex; flex-wrap: wrap; gap: 8px; }
+.oracion-banco[hidden] { display: none; }
+.oracion-ficha {
+  font: inherit;
+  font-weight: 700;
+  font-size: clamp(0.95rem, 4vw, 1.05rem);
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: 22px;
   border: 2px solid var(--azul);
   background: #fff;
   color: var(--azul);
-  box-shadow: 3px 3px 0 rgba(27, 55, 108, 0.25);
+  box-shadow: 3px 3px 0 rgba(27, 55, 108, 0.2);
   cursor: pointer;
 }
-.letra-ficha.usada { opacity: 0.25; box-shadow: none; cursor: default; }
-.letra-ficha.fallo,
+.oracion-armada .oracion-ficha { background: var(--azul); color: #fff; }
+.oracion-ficha:disabled { cursor: default; box-shadow: none; }
+.oracion-armada.bien .oracion-ficha { background: var(--verde); border-color: var(--verde); }
+.tarjeta .oracion-resultado { margin: 10px 0 0; font-weight: 700; min-height: 1.4em; }
 .ordenar-btn.fallo { border-color: var(--rojo); background: var(--rojo-claro); animation: sacudir 0.35s; }
-.palabra-hechas { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.tarjeta .palabra-hechas li {
-  background: var(--verde-claro);
-  border: 2px solid var(--verde);
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: clamp(0.92rem, 3.8vw, 1rem);
-  line-height: 1.4;
-}
 
 /* Ordena los pasos */
 .ordenar-lista { margin: 0 0 10px; padding: 0; list-style: none; counter-reset: paso; display: grid; gap: 6px; }
@@ -803,7 +805,7 @@ button { font-family: inherit; }
 }
 .ordenar-btn:hover { border-color: var(--azul); }
 @media (prefers-reduced-motion: reduce) {
-  .letra-ficha.fallo, .ordenar-btn.fallo { animation: none; }
+  .oracion-armada.mal, .ordenar-btn.fallo { animation: none; }
 }
 
 /* ---------- Paneles (Leer, Transcripción, Índice) ---------- */
